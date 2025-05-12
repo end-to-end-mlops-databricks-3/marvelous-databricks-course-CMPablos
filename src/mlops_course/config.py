@@ -7,7 +7,7 @@ from typing import Any
 class ProjectConfig(BaseModel):
     num_features: list[str]
     cat_features: list[str]
-    target: str
+    target_feature: str
     catalog_name: str
     schema_name: str
     dataset_name: str
