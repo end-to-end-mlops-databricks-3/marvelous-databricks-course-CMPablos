@@ -30,8 +30,8 @@ class DataProcessor:
         for col in self.config.cat_features:
             self.df[col] = self.df[col].astype("category")
 
-        target_feature = self.config.target
-        relevant_cols = cat_features + num_features + target_feature
+        target_feature = self.config.target_feature
+        relevant_cols = cat_features + num_features + [target_feature]
         self.df = self.df[relevant_cols]
 
     def split_data(self, test_size: float = 0.2, random_state: int = 42) -> tuple[pd.DataFrame, pd.DataFrame]:
