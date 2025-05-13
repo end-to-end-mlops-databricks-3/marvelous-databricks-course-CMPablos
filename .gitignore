@@ -101,3 +101,5 @@ dmypy.json
 *logs/
 
 test-reports
+
+tests/catalog/*.csv
