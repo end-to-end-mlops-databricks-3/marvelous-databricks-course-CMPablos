@@ -1,14 +1,16 @@
+# Databricks notebook source
+
 
 # COMMAND ------------------
 
 import yaml
 from loguru import logger
-import pandas as pd
-from pyspark.sql import SparkSession
-from mlops_course.config import ProjectConfig
-from mlops_course.data_processor import DataProcessor
 from marvelous.logging import setup_logging
 from marvelous.timer import Timer
+from pyspark.sql import SparkSession
+
+from mlops_course.config import ProjectConfig
+from mlops_course.data_processor import DataProcessor
 
 config = ProjectConfig.from_yaml(config_path="../project_config.yml", env="dev")
 print(config)
@@ -18,10 +20,10 @@ logger.info(yaml.dump(config, default_flow_style=False))
 
 # COMMAND ----------
 
-#Load the hotel_reservations dataset from volume
+# Load the hotel_reservations dataset from volume
 spark = SparkSession.builder.getOrCreate()
 
-hotel_reservation_data = r'/Volumes/mlops_dev/cpablosr/hotel_reservations/hotel_reservations.csv'
+hotel_reservation_data = r"/Volumes/mlops_dev/cpablosr/hotel_reservations/hotel_reservations.csv"
 sdf = spark.read.csv(hotel_reservation_data, header=True)
 df = sdf.toPandas()
 # COMMAND ----------

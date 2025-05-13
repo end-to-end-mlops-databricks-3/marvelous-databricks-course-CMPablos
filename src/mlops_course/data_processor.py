@@ -1,4 +1,5 @@
-import datetime
+"""Data preprocessing module."""
+
 import pandas as pd
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import current_timestamp, to_utc_timestamp
@@ -6,24 +7,28 @@ from sklearn.model_selection import train_test_split
 
 from mlops_course.config import ProjectConfig
 
+
 class DataProcessor:
-    def __init__(self, df: pd.DataFrame, 
-                 config: ProjectConfig, 
-                 spark: SparkSession) -> None:
+    """A class for preprocessing and managing DataFrame operations.
+
+    This class handles data preprocessing, splitting, and saving to Databricks tables.
+    """
+
+    def __init__(self, df: pd.DataFrame, config: ProjectConfig, spark: SparkSession) -> None:
         self.df = df
         self.config = config
         self.spark = spark
+
     def preprocess(self) -> None:
         """Prepocess the DataFrame stored in the instanced class."""
-
         # Replacing booking_status values to numeric
-        self.df['booking_status'].replace('Not_Canceled', 0, inplace=True)
-        self.df['booking_status'].replace('Canceled', 1, inplace=True)
+        self.df["booking_status"].replace("Not_Canceled", 0, inplace=True)
+        self.df["booking_status"].replace("Canceled", 1, inplace=True)
 
         # Converting features to numeric
         num_features = self.config.num_features
         for col in num_features:
-            self.df[col] = pd.to_numeric(self.df[col], errors = "coerce")
+            self.df[col] = pd.to_numeric(self.df[col], errors="coerce")
 
         # Converting categorical features
         cat_features = self.config.cat_features
@@ -35,23 +40,21 @@ class DataProcessor:
         self.df = self.df[relevant_cols]
 
     def split_data(self, test_size: float = 0.2, random_state: int = 42) -> tuple[pd.DataFrame, pd.DataFrame]:
-        """Splitsthe dataframe into a train and a test set
+        """Split the dataframe into a train and a test set.
 
         :param test_size: Proportion of the dataset to include in the test plit
         :param random_state: Sets the seed for the pseudo-random shuffling applied to the data
         :return: A tuple containing the train and test DataFrames
         """
-        
         train_set, test_set = train_test_split(self.df, test_size=test_size, random_state=random_state)
         return train_set, test_set
-    
+
     def save_to_catalog(self, train_set: pd.DataFrame, test_set: pd.DataFrame) -> None:
-        """Loads the train and test sets into Databricks tables.
-        
+        """Load the train and test sets into Databricks tables.
+
         :param train_set: The training DataFrame to be loaded.
         :param test_set: The testing DataFrame to be loaded.
         """
-
         train_set_with_timestamp = self.spark.createDataFrame(train_set).withColumn(
             "update_timestamp_utc", to_utc_timestamp(current_timestamp(), "UTC")
         )

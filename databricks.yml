@@ -13,6 +13,3 @@ targets:
     default: true
     workspace:
       host: https://dbc-c2e8445d-159d.cloud.databricks.com
-
-
-      
