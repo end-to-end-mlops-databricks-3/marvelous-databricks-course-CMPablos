@@ -99,3 +99,5 @@ dmypy.json
 #logs and debug
 *.log
 *logs/
+
+test-reports
