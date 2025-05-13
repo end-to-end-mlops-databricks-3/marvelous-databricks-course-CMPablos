@@ -13,6 +13,7 @@ class ProjectConfig(BaseModel):
     Supports environment-specific configuration overrides.
     """
 
+    id_column: list[str]
     num_features: list[str]
     cat_features: list[str]
     target_feature: str
