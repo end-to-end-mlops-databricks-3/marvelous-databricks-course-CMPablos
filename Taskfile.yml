@@ -27,6 +27,26 @@ tasks:
         - uv sync --extra test
         # - source .venv/Scripts/activate && uv sync --extra test # Activate and sync
 
+  run-unit-tests:
+    cmds:
+      - export PYTEST_EXIT_STATUS=0
+      - rm -rf test-reports || true
+      - uv run pytest -m "not ci_exclude" ./tests --cov "{{.TASKFILE_DIR}}/src/{{.PACKAGE_IMPORT_NAME}}" --cov-report html --cov-report term  --cov-report xml --junit-xml "{{.TASKFILE_DIR}}/test-reports/report.xml" --cov-fail-under 60 || ((PYTEST_EXIT_STATUS+=$?))
+      - mv coverage.xml "{{.TASKFILE_DIR}}/test-reports/" || true
+      - mv htmlcov "{{.TASKFILE_DIR}}/test-reports/" && rm -rf htmlcov
+      - mv .coverage "{{.TASKFILE_DIR}}/test-reports/" || true
+      - exit $PYTEST_EXIT_STATUS
+    silent: true
+    desc: "Run tests with coverage reports and move results to test-reports directory"
+
+  clean:
+    desc: "Clean up build artifacts, caches, and temporary files"
+    cmds:
+      - rm -rf dist build coverage.xml test-reports tests/mlruns test-house_price
+      - find . -type d \( -name "*cache*" -o -name "*.dist-info" -o -name "*.egg-info" -o -name "*htmlcov" \) -not -path "*env/*" -exec rm -r {} + || true
+      - find . -type f -name "*.pyc" -not -path "*env/*" -exec rm {} +
+    silent: true
+
   lint:
     desc: Run pre-commit hooks
     cmds:
