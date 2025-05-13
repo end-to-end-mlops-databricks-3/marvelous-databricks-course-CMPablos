@@ -1,18 +1,15 @@
 """Dataset processing script."""
 
-import os
-
 import yaml
 from loguru import logger
+from marvelous.logging import setup_logging
+from marvelous.timer import Timer
 from pyspark.sql import SparkSession
 
 from mlops_course.config import ProjectConfig
 from mlops_course.data_processor import DataProcessor
-from marvelous.logging import setup_logging
-from marvelous.timer import Timer
 
-
-config_path = f"../project_config.yml"
+config_path = "../project_config.yml"
 
 config = ProjectConfig.from_yaml(config_path=config_path, env="dev")
 
@@ -25,7 +22,9 @@ logger.info(yaml.dump(config, default_flow_style=False))
 # Load the hotel_reservations dataset from volume
 spark = SparkSession.builder.getOrCreate()
 
-hotel_reservation_data = f"/Volumes/{config.catalog_name}/{config.schema_name}//hotel_reservations/hotel_reservations.csv"
+hotel_reservation_data = (
+    f"/Volumes/{config.catalog_name}/{config.schema_name}//hotel_reservations/hotel_reservations.csv"
+)
 sdf = spark.read.csv(hotel_reservation_data, header=True, inferSchema=True)
 df = sdf.toPandas()
 
