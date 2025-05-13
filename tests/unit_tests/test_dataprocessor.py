@@ -52,8 +52,9 @@ def test_column_transformations(sample_data: pd.DataFrame, config: ProjectConfig
     processor = DataProcessor(df=sample_data, config=config, spark=spark_session)
     processor.preprocess()
 
-    assert processor.df["booking_status"].isin([0,1]).all()
+    assert processor.df["booking_status"].isin([0, 1]).all()
     assert processor.df["repeated_guest"].dtype == "category"
+
 
 def test_missing_value_handling(sample_data: pd.DataFrame, config: ProjectConfig, spark_session: SparkSession) -> None:
     """Test missing value handling in the DataProcessor.

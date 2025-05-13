@@ -1057,7 +1057,7 @@ wheels = [
 [[package]]
 name = "marvelous"
 version = "0.1.0"
-source = { git = "https://github.com/end-to-end-mlops-databricks-3/marvelous.git?rev=0.1.0#7fc6264a3f6c1401662fa2ce0d31972b50d0d0fb" }
+source = { git = "https://github.com/end-to-end-mlops-databricks-3/marvelous?rev=0.1.0#7fc6264a3f6c1401662fa2ce0d31972b50d0d0fb" }
 dependencies = [
     { name = "loguru" },
     { name = "requests" },
@@ -1211,7 +1211,7 @@ requires-dist = [
     { name = "ipykernel", marker = "extra == 'dev'", specifier = ">=6.29.5,<7" },
     { name = "lightgbm", specifier = "==4.5.0" },
     { name = "loguru", specifier = "==0.7.3" },
-    { name = "marvelous", git = "https://github.com/end-to-end-mlops-databricks-3/marvelous.git?rev=0.1.0" },
+    { name = "marvelous", git = "https://github.com/end-to-end-mlops-databricks-3/marvelous?rev=0.1.0" },
     { name = "matplotlib", specifier = "==3.9.2" },
     { name = "mlflow", specifier = "==2.17.0" },
     { name = "numpy", specifier = "==1.26.4" },
