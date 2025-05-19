@@ -31,7 +31,7 @@ class BasicModel:
         # Extract settings from the config
         self.num_features = self.config.num_features
         self.cat_features = self.config.cat_features
-        self.target = self.config.target
+        self.target = self.config.target_feature
         self.parameters = self.config.parameters
         self.catalog_name = self.config.catalog_name
         self.schema_name = self.config.schema_name
@@ -44,16 +44,22 @@ class BasicModel:
 
         Splits data into features (X_train, X_test) and target (y_train, y_test).
         """
-        logger.info("🔄 Loading data from Databricks tables...")
+        logger.info("🔄 Loading train data from Databricks tables...")
         self.train_set_spark = self.spark.table(f"{self.catalog_name}.{self.schema_name}.hotel_reservations_train_set")
+        self.train_set_spark = self.train_set_spark.coalesce(1)
+        logger.info("🔄 Converting train dataset to pandas table...")
         self.train_set = self.train_set_spark.toPandas()
-        self.test_set = self.spark.table(f"{self.catalog_name}.{self.schema_name}.hotel_reservations_test_set").toPandas()
+        logger.info("🔄 Loading test data...")
+        self.test_set_spark = self.spark.table(f"{self.catalog_name}.{self.schema_name}.hotel_reservations_test_set")
+        self.test_set_spark = self.test_set_spark.coalesce(1)
+        logger.info("🔄 Converting test dataset to pandas table...")
+        self.test_set_spark = self.test_set_spark.toPandas()
         self.data_version = "0"  # describe history -> retrieve
 
         self.X_train = self.train_set[self.num_features + self.cat_features]
-        self.y_train = self.train_set[self.target]
+        self.y_train = self.train_set[self.target_feature]
         self.X_test = self.test_set[self.num_features + self.cat_features]
-        self.y_test = self.test_set[self.target]
+        self.y_test = self.test_set[self.target_feature]
         logger.info("✅ Data successfully loaded.")
 
     def prepare_features(self) -> None:
