@@ -7,11 +7,15 @@ from pyspark.sql import SparkSession
 
 from mlops_course.config import ProjectConfig, Tags
 from mlops_course.models.basic_model import BasicModel
-
-
+import os
+from dotenv import load_dotenv
+from marvelous.common import is_databricks
 # COMMAND ------------
-mlflow.set_tracking_uri("databricks")
-mlflow.set_registry_uri("databricks-uc")
+if not is_databricks():
+    load_dotenv()
+    profile = os.environ["PROFILE"]
+    mlflow.set_tracking_uri(f"databricks://{profile}")
+    mlflow.set_registry_uri(f"databricks-uc://{profile}")
 
 config = ProjectConfig.from_yaml(config_path="../project_config.yml")
 spark = SparkSession.builder.getOrCreate()
@@ -53,9 +57,9 @@ basic_model.register_model()
 # COMMAND ----------
 # Predict on the test set
 
-test_set = spark.table(f"{config.catalog_name}.{config.schema_name}.test_set").limit(10)
+test_set = spark.table(f"{config.catalog_name}.{config.schema_name}.hotel_reservations_test_set").limit(10)
 
-X_test = test_set.drop(config.target).toPandas()
+X_test = test_set.drop(config.target_feature).toPandas()
 
 predictions_df = basic_model.load_latest_model_and_predict(X_test)
 # COMMAND ----------
