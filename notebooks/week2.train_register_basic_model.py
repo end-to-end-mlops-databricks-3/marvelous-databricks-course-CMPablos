@@ -1,15 +1,17 @@
-# Databricks Notebook source
+"""Train-register basic model notebook."""
 
 # COMMAND ------------
 
+import os
+
 import mlflow
+from dotenv import load_dotenv
+from marvelous.common import is_databricks
 from pyspark.sql import SparkSession
 
 from mlops_course.config import ProjectConfig, Tags
 from mlops_course.models.basic_model import BasicModel
-import os
-from dotenv import load_dotenv
-from marvelous.common import is_databricks
+
 # COMMAND ------------
 if not is_databricks():
     load_dotenv()

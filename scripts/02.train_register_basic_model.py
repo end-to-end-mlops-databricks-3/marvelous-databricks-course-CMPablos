@@ -1,15 +1,17 @@
+"""Train - register basic model."""
+
 import argparse
+import os
 
 import mlflow
+from dotenv import load_dotenv
 from loguru import logger
+from marvelous.common import is_databricks
 from pyspark.dbutils import DBUtils
 from pyspark.sql import SparkSession
 
 from mlops_course.config import ProjectConfig, Tags
 from mlops_course.models.basic_model import BasicModel
-from marvelous.common import is_databricks
-from dotenv import load_dotenv
-import os
 
 # Configure tracking uri
 mlflow.get_tracking_uri()
@@ -74,9 +76,7 @@ tags_dict = {"git_sha": args.git_sha, "branch": args.branch, "job_run_id": args.
 tags = Tags(**tags_dict)
 
 # Initialize model
-basic_model = BasicModel(
-    config=config, tags=tags, spark=spark
-)
+basic_model = BasicModel(config=config, tags=tags, spark=spark)
 logger.info("Model initialized.")
 
 # Load data and prepare features

@@ -1,3 +1,5 @@
+"""Basic model implementation."""
+
 import mlflow
 import numpy as np
 import pandas as pd
@@ -8,23 +10,26 @@ from mlflow.data.dataset_source import DatasetSource
 from mlflow.models import infer_signature
 from pyspark.sql import SparkSession
 from sklearn.compose import ColumnTransformer
-from sklearn.metrics import precision_score, recall_score, f1_score
+from sklearn.metrics import f1_score, precision_score, recall_score
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder
 
 from mlops_course.config import ProjectConfig, Tags
 
+
 class BasicModel:
     """Basic model for hotel reservation prediction using LightGBM.
-    
-    This class handles data loading, feature preparation, model training and MLflow logging"""
+
+    This class handles data loading, feature preparation, model training and MLflow logging
+    """
 
     def __init__(self, config: ProjectConfig, tags: Tags, spark: SparkSession) -> None:
         """Initialize the model with project configuration.
-        
+
         :param config: project configuration object
         :param tags: Tags object
-        :param spark: SparkSession object"""
+        :param spark: SparkSession object
+        """
         self.config = config
         self.spark = spark
 
