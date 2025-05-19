@@ -9,7 +9,7 @@ dev:
   schema_name: cpablosr
 
 parameters:
-  learning_date: 0.001
+  learning_rate: 0.001
   n_estimators: 1000
   max_depth: 3
 
