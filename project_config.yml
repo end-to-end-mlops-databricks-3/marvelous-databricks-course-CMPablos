@@ -9,8 +9,8 @@ dev:
   schema_name: cpablosr
 
 parameters:
-  learning_rate: 0.001
-  n_estimators: 1000
+  learning_rate: 0.01
+  n_estimators: 500
   max_depth: 3
 
 experiment_name_basic: /Shared/hotel-reservations-basic
