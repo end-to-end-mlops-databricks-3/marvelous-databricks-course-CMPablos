@@ -7,8 +7,17 @@ from pyspark.sql import SparkSession
 
 from mlops_course.config import ProjectConfig, Tags
 from mlops_course.models.basic_model import BasicModel
+from marvelous.common import is_databricks
+from dotenv import load_dotenv
+import os
 
 # Configure tracking uri
+mlflow.get_tracking_uri()
+
+if not is_databricks():
+    load_dotenv()
+    profile = os.environ["PROFILE"]
+    mlflow.set_tracking_uri(f"databricks://{profile}")
 mlflow.set_tracking_uri("databricks")
 mlflow.set_registry_uri("databricks-uc")
 
