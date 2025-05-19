@@ -13,6 +13,7 @@ parameters:
   n_estimators: 1000
   max_depth: 3
 
+experiment_name_basic: /Shared/hotel-reservations-basic
 dataset_name: hotel_reservations
 
 id_column:

@@ -21,6 +21,7 @@ class ProjectConfig(BaseModel):
     schema_name: str
     dataset_name: str
     parameters: dict[str, Any]
+    experiment_name_basic: str
 
     @classmethod
     def from_yaml(cls, config_path: str, env: str = "dev") -> "ProjectConfig":
@@ -48,4 +49,3 @@ class Tags(BaseModel):
 
     git_sha: str
     branch: str
-    job_run_id: str
