@@ -21,7 +21,10 @@ from mlops_course.config import ProjectConfig, Tags
 class FeatureLookUpModel:
     """A class to manage FeatureLookupModel."""
 
-    def __init__(self, config: ProjectConfig, tags: Tags, spark: SparkSession) -> None:
+    def __init__(self,
+                 config: ProjectConfig, 
+                 tags: Tags, 
+                 spark: SparkSession) -> None:
         """Initialize the model with project configuration."""
         self.config = config
         self.spark = spark
@@ -31,7 +34,7 @@ class FeatureLookUpModel:
         # Extract settings from the config
         self.num_features = self.config.num_features
         self.cat_features = self.config.cat_features
-        self.target = self.config.target
+        self.target_feature = self.config.target_feature
         self.parameters = self.config.parameters
         self.catalog_name = self.config.catalog_name
         self.schema_name = self.config.schema_name
@@ -82,7 +85,7 @@ class FeatureLookUpModel:
     def load_data(self) -> None:
         """Load training and testing data from Delta tables.
 
-        Drops specified columns and casts 'YearBuilt' to integer type.
+        Drops specified columns and casts 'no_of adults' and 'no_of_children' to integer type.
         """
         self.train_set = self.spark.table(f"{self.catalog_name}.{self.schema_name}.hotel_reservations_train_set").drop(
             "lead_time", "no_of_special_requests", "arrival_year"
@@ -102,7 +105,7 @@ class FeatureLookUpModel:
         """
         self.training_set = self.fe.create_training_set(
             df=self.train_set,
-            label=self.target,
+            label=self.target_feature,
             feature_lookups=[
                 FeatureLookup(
                     table_name=self.feature_table_name,
@@ -123,9 +126,9 @@ class FeatureLookUpModel:
         self.test_set["total_guests"] = self.test_set["no_of_children"] + self.test_set["no_of_adults"]
 
         self.X_train = self.training_df[self.num_features + self.cat_features + ["total_guests"]]
-        self.y_train = self.training_df[self.target]
+        self.y_train = self.training_df[self.target_feature]
         self.X_test = self.test_set[self.num_features + self.cat_features + ["total_guests"]]
-        self.y_test = self.test_set[self.target]
+        self.y_test = self.test_set[self.target_feature]
 
         logger.info("✅ Feature engineering completed.")
 
@@ -194,7 +197,7 @@ class FeatureLookUpModel:
         )
 
         return latest_version
-##############################################
+
     def load_latest_model_and_predict(self, X: DataFrame) -> DataFrame:
         """Load the trained model from MLflow using Feature Engineering Client and make predictions.
 
