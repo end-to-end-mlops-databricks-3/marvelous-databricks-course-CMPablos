@@ -1,25 +1,16 @@
-# Databricks notebook source
-# MAGIC %pip install hotel_reservations_price-1.0.1-py3-none-any.whl
+"""Train-register fe model notebook."""
 
-# COMMAND ----------
-
-# MAGIC %restart_python
-
-# COMMAND ----------
-
-# Configure tracking uri
-import mlflow
-from loguru import logger
-from pyspark.sql import SparkSession
-from dotenv import load_dotenv
 import os
+
+import mlflow
+from dotenv import load_dotenv
+from loguru import logger
 from marvelous.common import is_databricks
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import col
+
 from mlops_course.config import ProjectConfig, Tags
 from mlops_course.models.feature_lookup_model import FeatureLookUpModel
-
-# Configure tracking uri
-# mlflow.set_tracking_uri("databricks")
-# mlflow.set_registry_uri("databricks-uc")
 
 if not is_databricks():
     load_dotenv()
@@ -32,14 +23,13 @@ tags_dict = {"git_sha": "abcd12345", "branch": "week3"}
 tags = Tags(**tags_dict)
 
 config = ProjectConfig.from_yaml(config_path="../project_config.yml")
-# config = ProjectConfig.from_yaml(config_path="project_config.yml")
-
 
 
 # COMMAND ----------
 
 # Initialize model
-for i in config: print(i)
+for i in config:
+    print(i)
 fe_model = FeatureLookUpModel(config=config, tags=tags, spark=spark)
 
 # COMMAND ----------
@@ -87,16 +77,16 @@ X_test = test_set.drop("lead_time", "no_of_special_requests", "arrival_year", co
 # COMMAND ----------
 
 
-from pyspark.sql.functions import col
-
-X_test = X_test.withColumn("no_of_adults", col("no_of_adults").cast("int")) \
-       .withColumn("no_of_children", col("no_of_children").cast("int")) \
-       .withColumn("no_of_weekend_nights", col("no_of_weekend_nights").cast("int")) \
-       .withColumn("no_of_week_nights", col("no_of_week_nights").cast("int")) \
-       .withColumn("arrival_month", col("arrival_month").cast("int")) \
-       .withColumn("arrival_date", col("arrival_date").cast("int")) \
-       .withColumn("no_of_previous_cancellations", col("no_of_previous_cancellations").cast("int")) \
-       .withColumn("no_of_previous_bookings_not_canceled", col("no_of_previous_bookings_not_canceled").cast("int"))
+X_test = (
+    X_test.withColumn("no_of_adults", col("no_of_adults").cast("int"))
+    .withColumn("no_of_children", col("no_of_children").cast("int"))
+    .withColumn("no_of_weekend_nights", col("no_of_weekend_nights").cast("int"))
+    .withColumn("no_of_week_nights", col("no_of_week_nights").cast("int"))
+    .withColumn("arrival_month", col("arrival_month").cast("int"))
+    .withColumn("arrival_date", col("arrival_date").cast("int"))
+    .withColumn("no_of_previous_cancellations", col("no_of_previous_cancellations").cast("int"))
+    .withColumn("no_of_previous_bookings_not_canceled", col("no_of_previous_bookings_not_canceled").cast("int"))
+)
 
 
 # COMMAND ----------
@@ -110,4 +100,3 @@ predictions = fe_model.load_latest_model_and_predict(X_test)
 logger.info(predictions)
 
 # COMMAND ----------
-

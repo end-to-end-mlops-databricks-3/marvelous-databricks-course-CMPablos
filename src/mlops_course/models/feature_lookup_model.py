@@ -1,4 +1,4 @@
-from datetime import datetime
+"""FeatureLookUp model implementation."""
 
 import mlflow
 from databricks import feature_engineering
@@ -9,7 +9,6 @@ from loguru import logger
 from mlflow.models import infer_signature
 from mlflow.tracking import MlflowClient
 from pyspark.sql import DataFrame, SparkSession
-from pyspark.sql import functions as F
 from sklearn.compose import ColumnTransformer
 from sklearn.metrics import f1_score, precision_score, recall_score
 from sklearn.pipeline import Pipeline
@@ -21,10 +20,7 @@ from mlops_course.config import ProjectConfig, Tags
 class FeatureLookUpModel:
     """A class to manage FeatureLookupModel."""
 
-    def __init__(self,
-                 config: ProjectConfig, 
-                 tags: Tags, 
-                 spark: SparkSession) -> None:
+    def __init__(self, config: ProjectConfig, tags: Tags, spark: SparkSession) -> None:
         """Initialize the model with project configuration."""
         self.config = config
         self.spark = spark
@@ -68,7 +64,7 @@ class FeatureLookUpModel:
         logger.info("✅ Feature table created and populated.")
 
     def define_feature_function(self) -> None:
-        """Define a function to calculate the total number of guests
+        """Define a function to calculate the total number of guests.
 
         This function sums the number of adults with the number of children.
         """
@@ -90,7 +86,9 @@ class FeatureLookUpModel:
         self.train_set = self.spark.table(f"{self.catalog_name}.{self.schema_name}.hotel_reservations_train_set").drop(
             "lead_time", "no_of_special_requests", "arrival_year"
         )
-        self.test_set = self.spark.table(f"{self.catalog_name}.{self.schema_name}.hotel_reservations_test_set").toPandas()
+        self.test_set = self.spark.table(
+            f"{self.catalog_name}.{self.schema_name}.hotel_reservations_test_set"
+        ).toPandas()
 
         self.train_set = self.train_set.withColumn("no_of_adults", self.train_set["no_of_adults"].cast("int"))
         self.train_set = self.train_set.withColumn("no_of_children", self.train_set["no_of_children"].cast("int"))
@@ -122,7 +120,6 @@ class FeatureLookUpModel:
         )
 
         self.training_df = self.training_set.load_df().toPandas()
-        current_year = datetime.now().year
         self.test_set["total_guests"] = self.test_set["no_of_children"] + self.test_set["no_of_adults"]
 
         self.X_train = self.training_df[self.num_features + self.cat_features + ["total_guests"]]
