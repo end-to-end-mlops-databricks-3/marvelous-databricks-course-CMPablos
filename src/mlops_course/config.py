@@ -22,6 +22,7 @@ class ProjectConfig(BaseModel):
     dataset_name: str
     parameters: dict[str, Any]
     experiment_name_basic: str
+    experiment_name_fe: str
 
     @classmethod
     def from_yaml(cls, config_path: str, env: str = "dev") -> "ProjectConfig":

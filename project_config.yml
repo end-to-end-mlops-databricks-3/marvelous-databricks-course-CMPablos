@@ -14,6 +14,7 @@ parameters:
   max_depth: 3
 
 experiment_name_basic: /Shared/hotel-reservations-basic
+experiment_name_fe: /Shared/hotel-reservations-fe
 dataset_name: hotel_reservations
 
 id_column:
