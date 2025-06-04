@@ -1,13 +1,8 @@
-# Databricks notebook source
-# MAGIC %pip install house_price-1.0.1-py3-none-any.whl
-
-# COMMAND ----------
-# MAGIC %restart_python
+"""Model serving endpoint notebook."""
 
 # COMMAND ----------
 import os
 import time
-from typing import Dict, List
 
 import requests
 from loguru import logger
@@ -51,25 +46,25 @@ feature_model_server.deploy_or_update_serving_endpoint()
 # COMMAND ----------
 # Create a sample request body
 required_columns = [
-            "no_of_adults",
-            "no_of_children",
-            "no_of_weekend_nights",
-            "no_of_week_nights",
-            "lead_time",
-            "arrival_year",
-            "arrival_month",
-            "arrival_date",
-            "no_of_previous_cancellations",
-            "no_of_previous_bookings_not_canceled",
-            "avg_price_per_room",
-            "no_of_special_requests",
-            "type_of_meal_plan",
-            "required_car_parking_space",
-            "room_type_reserved",
-            "market_segment_type",
-            "repeated_guest",
-            "booking_status",
-            "Booking_ID"
+    "no_of_adults",
+    "no_of_children",
+    "no_of_weekend_nights",
+    "no_of_week_nights",
+    "lead_time",
+    "arrival_year",
+    "arrival_month",
+    "arrival_date",
+    "no_of_previous_cancellations",
+    "no_of_previous_bookings_not_canceled",
+    "avg_price_per_room",
+    "no_of_special_requests",
+    "type_of_meal_plan",
+    "required_car_parking_space",
+    "room_type_reserved",
+    "market_segment_type",
+    "repeated_guest",
+    "booking_status",
+    "Booking_ID",
 ]
 
 spark = SparkSession.builder.getOrCreate()
@@ -81,12 +76,11 @@ dataframe_records = [[record] for record in sampled_records]
 logger.info(train_set.dtypes)
 logger.info(dataframe_records[0])
 
+
 # COMMAND ----------
 # Call the endpoint with one sample record
-def call_endpoint(record):
-    """
-    Calls the model serving endpoint with a given input record.
-    """
+def call_endpoint(record: list[dir]) -> tuple[str, str]:
+    """Call the model serving endpoint with a given input record."""
     serving_endpoint = f"https://{os.environ['DBR_HOST']}/serving-endpoints/{endpoint_name}/invocations"
 
     response = requests.post(
