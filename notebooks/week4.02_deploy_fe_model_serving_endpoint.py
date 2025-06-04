@@ -74,7 +74,7 @@ required_columns = [
 
 spark = SparkSession.builder.getOrCreate()
 
-train_set = spark.table(f"{config.catalog_name}.{config.schema_name}.train_set").toPandas()
+train_set = spark.table(f"{config.catalog_name}.{config.schema_name}.hotel_reservations_train_set").toPandas()
 sampled_records = train_set[required_columns].sample(n=1000, replace=True).to_dict(orient="records")
 dataframe_records = [[record] for record in sampled_records]
 
