@@ -55,29 +55,25 @@ class DataProcessor:
         return train_set, test_set
 
     def save_to_catalog(self, train_set: pd.DataFrame, test_set: pd.DataFrame) -> None:
-        """Load the train and test sets into Databricks tables.
+        """Save the train and test sets into Databricks tables.
 
-        :param train_set: The training DataFrame to be loaded.
-        :param test_set: The testing DataFrame to be loaded.
+        :param train_set: The training DataFrame to be saved.
+        :param test_set: The test DataFrame to be saved.
         """
         train_set_with_timestamp = self.spark.createDataFrame(train_set).withColumn(
             "update_timestamp_utc", to_utc_timestamp(current_timestamp(), "UTC")
         )
 
-        catalog_name = self.config.catalog_name
-        schema_name = self.config.schema_name
-        dataset_name = self.config.dataset_name
-
         test_set_with_timestamp = self.spark.createDataFrame(test_set).withColumn(
             "update_timestamp_utc", to_utc_timestamp(current_timestamp(), "UTC")
         )
 
-        train_set_with_timestamp.write.mode("overwrite").saveAsTable(
-            f"{catalog_name}.{schema_name}.{dataset_name}_train_set"
+        train_set_with_timestamp.write.mode("append").saveAsTable(
+            f"{self.config.catalog_name}.{self.config.schema_name}.hotel_reservations_train_set"
         )
 
-        test_set_with_timestamp.write.mode("overwrite").saveAsTable(
-            f"{catalog_name}.{schema_name}.{dataset_name}_test_set"
+        test_set_with_timestamp.write.mode("append").saveAsTable(
+            f"{self.config.catalog_name}.{self.config.schema_name}.hotel_reservations_test_set"
         )
 
     def enable_change_data_feed(self) -> None:
@@ -85,17 +81,14 @@ class DataProcessor:
 
         This method alters the tables to enable Change Data Feed functionality.
         """
-        catalog_name = self.config.catalog_name
-        schema_name = self.config.schema_name
-        dataset_name = self.config.dataset_name
 
         self.spark.sql(
-            f"ALTER TABLE {catalog_name}.{schema_name}.{dataset_name}_train_set "
+            f"ALTER TABLE {self.config.catalog_name}.{self.config.schema_name}.{self.config.dataset_name}_hotel_reservations_train_set "
             "SET TBLPROPERTIES (delta.enableChangeDataFeed = true);"
         )
 
         self.spark.sql(
-            f"ALTER TABLE {catalog_name}.{schema_name}.{dataset_name}_test_set "
+            f"ALTER TABLE {self.config.catalog_name}.{self.config.schema_name}.{self.config.dataset_name}_hotel_reservations_test_set "
             "SET TBLPROPERTIES (delta.enableChangeDataFeed = true);"
         )
 
