@@ -80,7 +80,7 @@ resources:
           depends_on:
             - task_key: "preprocessing"
           spark_python_task:
-            python_file: "scripts/02.train_register_basic_model.py"
+            python_file: "scripts/02.train_register_fe_model.py"
             parameters:
               - "model_train_register"
               - "--root_path"
@@ -155,11 +155,53 @@ resources:
 
 targets:
   dev:
-    # The default target uses 'mode: development' to create a development copy.
-    # - Deployed resources get prefixed with '[dev my_user_name]'
-    # - Any job schedules and triggers are paused by default.
-    # See also https://docs.databricks.com/dev-tools/bundles/deployment-modes.html.
-    mode: development
+    cluster_id: 0611-032131-njrph3cq #replace with your own!
     default: true
+    mode: development
     workspace:
       host: https://dbc-c2e8445d-159d.cloud.databricks.com
+      root_path: /Workspace/Users/${workspace.current_user.userName}/.bundle/${bundle.target}/${bundle.name}
+    variables:
+      schedule_pause_status: PAUSED
+      is_test: 1
+      env: dev
+    artifacts:
+      default:
+        type: whl
+        build: uv build
+        path: .
+        dynamic_version: True
+
+  test:
+    presets:
+      name_prefix: 'test_'
+    workspace:
+      host: https://dbc-c2e8445d-159d.cloud.databricks.com
+      root_path: /Shared/.bundle/${bundle.target}/${bundle.name}
+    variables:
+      schedule_pause_status: PAUSED
+      is_test: 1
+      env: dev
+
+
+  acc:
+    presets:
+      name_prefix: 'acc_'
+    workspace:
+      host: https://dbc-c2e8445d-159d.cloud.databricks.com
+      root_path: /Shared/.bundle/${bundle.target}/${bundle.name}
+    variables:
+      schedule_pause_status: PAUSED
+      is_test: 1
+      env: acc
+
+
+  prd:
+    mode: production
+    workspace:
+      host: https://dbc-c2e8445d-159d.cloud.databricks.com
+      root_path: /Shared/.bundle/${bundle.target}/${bundle.name}
+    variables:
+      schedule_pause_status: PAUSED # normally UNPAUSED
+      is_test: 0
+      env: prd
