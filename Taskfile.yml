@@ -42,7 +42,7 @@ tasks:
   clean:
     desc: "Clean up build artifacts, caches, and temporary files"
     cmds:
-      - rm -rf dist build coverage.xml test-reports tests/mlruns test-house_price
+      - rm -rf dist build coverage.xml test-reports tests/mlruns test-hotel_reservations
       - find . -type d \( -name "*cache*" -o -name "*.dist-info" -o -name "*.egg-info" -o -name "*htmlcov" \) -not -path "*env/*" -exec rm -r {} + || true
       - find . -type f -name "*.pyc" -not -path "*env/*" -exec rm {} +
     silent: true
