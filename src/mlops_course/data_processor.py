@@ -156,7 +156,9 @@ def generate_synthetic_data(df: pd.DataFrame, drift: bool = False, num_rows: int
         "arrival_date",
         "no_of_previous_cancellations",
         "no_of_previous_bookings_not_canceled",
-        "no_of_special_requests"
+        "no_of_special_requests",
+        "required_car_parking_space",
+        "repeated_guest"
     }
     for col in int_columns.intersection(df.columns):
         synthetic_data[col] = synthetic_data[col].astype(np.int64)
