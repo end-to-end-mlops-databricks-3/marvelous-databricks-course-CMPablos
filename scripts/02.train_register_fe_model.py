@@ -5,8 +5,8 @@ from loguru import logger
 from pyspark.dbutils import DBUtils
 from pyspark.sql import SparkSession
 
-from house_price.config import ProjectConfig, Tags
-from house_price.models.feature_lookup_model import FeatureLookUpModel
+from mlops_course.config import ProjectConfig, Tags
+from mlops_course.models.feature_lookup_model import FeatureLookUpModel
 from marvelous.common import create_parser
 
 args = create_parser()
