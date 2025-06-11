@@ -1,6 +1,6 @@
 # See https://docs.databricks.com/dev-tools/bundles/index.html for documentation.
 bundle:
-  name: hotel-reservations
+  name: hotel-reservations-cmpablos
 
 artifacts:
   default:
