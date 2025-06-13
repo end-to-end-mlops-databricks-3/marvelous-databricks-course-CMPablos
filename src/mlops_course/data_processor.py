@@ -40,6 +40,7 @@ class DataProcessor:
             self.df[col] = self.df[col].astype("category")
 
         id_column = self.config.id_column
+        self.df[id_column] = self.df[id_column].astype("str")
         target_feature = self.config.target_feature
         relevant_cols = [id_column] + cat_features + num_features + [target_feature]
         self.df = self.df[relevant_cols]
@@ -68,11 +69,11 @@ class DataProcessor:
             "update_timestamp_utc", to_utc_timestamp(current_timestamp(), "UTC")
         )
 
-        train_set_with_timestamp.write.mode("append").saveAsTable(
+        train_set_with_timestamp.write.mode("overwrite").saveAsTable(
             f"{self.config.catalog_name}.{self.config.schema_name}.hotel_reservations_train_set"
         )
 
-        test_set_with_timestamp.write.mode("append").saveAsTable(
+        test_set_with_timestamp.write.mode("overwrite").saveAsTable(
             f"{self.config.catalog_name}.{self.config.schema_name}.hotel_reservations_test_set"
         )
 
@@ -167,7 +168,7 @@ def generate_synthetic_data(df: pd.DataFrame, drift: bool = False, num_rows: int
 
     if drift:
         # Skew the top features to introduce drift
-        top_features = ["no_of_special_requests", "lead_time", "avg_price_per_room"]  # Select top 2 features
+        top_features = ["no_of_special_requests", "lead_time"]  # Select top 2 features
         for feature in top_features:
             if feature in synthetic_data.columns:
                 synthetic_data[feature] = synthetic_data[feature] * 2

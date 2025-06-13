@@ -36,7 +36,7 @@ feature_model_server = FeatureLookupServing(
     feature_table_name=f"{catalog_name}.{schema_name}.hotel_reservations_features",
 )
 
-# Create or update the online table for house features
+# Create or update the online table for hotel reservations features
 feature_model_server.create_or_update_online_table()
 logger.info("Created or updated online table.")
 
