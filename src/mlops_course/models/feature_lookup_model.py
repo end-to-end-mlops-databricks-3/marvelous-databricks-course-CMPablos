@@ -9,6 +9,7 @@ from loguru import logger
 from mlflow.models import infer_signature
 from mlflow.tracking import MlflowClient
 from pyspark.sql import DataFrame, SparkSession
+from pyspark.sql import functions as F
 from sklearn.compose import ColumnTransformer
 from sklearn.metrics import f1_score, precision_score, recall_score
 from sklearn.pipeline import Pipeline
@@ -87,8 +88,7 @@ class FeatureLookUpModel:
             "lead_time", "no_of_special_requests", "arrival_year"
         )
         self.test_set = self.spark.table(
-            f"{self.catalog_name}.{self.schema_name}.hotel_reservations_test_set"
-        ).toPandas()
+            f"{self.catalog_name}.{self.schema_name}.hotel_reservations_test_set").toPandas()
 
         self.train_set = self.train_set.withColumn("no_of_adults", self.train_set["no_of_adults"].cast("int"))
         self.train_set = self.train_set.withColumn("no_of_children", self.train_set["no_of_children"].cast("int"))
@@ -206,3 +206,94 @@ class FeatureLookUpModel:
 
         predictions = self.fe.score_batch(model_uri=model_uri, df=X)
         return predictions
+
+    def update_feature_table(self) -> None:
+            """Update the hotel_reservations table with the latest records from train and test sets.
+
+            Executes SQL queries to insert new records based on timestamp.
+            """
+            queries = [
+                f"""
+                WITH max_timestamp AS (
+                    SELECT MAX(update_timestamp_utc) AS max_update_timestamp
+                    FROM {self.config.catalog_name}.{self.config.schema_name}.hotel_reservations_train_set
+                )
+                INSERT INTO {self.feature_table_name}
+                SELECT Booking_ID, lead_time, no_of_special_requests, arrival_year
+                FROM {self.config.catalog_name}.{self.config.schema_name}.hotel_reservations_train_set
+                WHERE update_timestamp_utc >= (SELECT max_update_timestamp FROM max_timestamp)
+                """,
+                f"""
+                WITH max_timestamp AS (
+                    SELECT MAX(update_timestamp_utc) AS max_update_timestamp
+                    FROM {self.config.catalog_name}.{self.config.schema_name}.hotel_reservations_test_set
+                )
+                INSERT INTO {self.feature_table_name}
+                SELECT Booking_ID, lead_time, no_of_special_requests, arrival_year
+                FROM {self.config.catalog_name}.{self.config.schema_name}.hotel_reservations_test_set
+                WHERE update_timestamp_utc >= (SELECT max_update_timestamp FROM max_timestamp)
+                """,
+            ]
+
+            for query in queries:
+                logger.info("Executing SQL update query...")
+                self.spark.sql(query)
+            logger.info("Hotel reservations features table updated successfully.")
+
+    def model_improved(self, test_set: DataFrame) -> bool:
+        """Evaluate the model performance on the test set.
+
+        Compares the current model with the latest registered model using error count.
+        :param test_set: DataFrame containing the test data.
+        :return: True if the current model performs better, False otherwise.
+        """
+        X_test = test_set.drop(self.config.target_feature)
+        X_test = X_test.withColumn("no_of_adults", F.col("no_of_adults").cast("int"))
+        X_test = X_test.withColumn("no_of_children", F.col("no_of_children").cast("int"))
+        logger.info("#################### test_set THEN ######################")
+        print(X_test)
+        logger.info(X_test)
+        logger.info(X_test.head())
+
+        predictions_latest = self.load_latest_model_and_predict(X_test).withColumnRenamed(
+            "prediction", "prediction_latest"
+        )
+
+        current_model_uri = f"runs:/{self.run_id}/lightgbm-pipeline-model-fe"
+        predictions_current = self.fe.score_batch(model_uri=current_model_uri, df=X_test).withColumnRenamed(
+            "prediction", "prediction_current"
+        )
+
+
+        test_set = test_set.select("Booking_ID", "booking_status")
+        logger.info("#################### test_set NOW ######################")
+        logger.info(X_test.head())
+
+        logger.info("Predictions are ready.")
+
+        # Join the DataFrames on the 'Bookin_ID' column
+        df = (test_set.join(predictions_current, on="Booking_ID").join(predictions_latest, on="Booking_ID")).toPandas()
+        logger.info("###################### df NOW ######################")
+        logger.info(df.head())
+
+        # Calculate the labels for each model
+        df["prediction_error_current"] = df["booking_status"] != df["prediction_current"]
+        df["prediction_error_latest"] = df["booking_status"] != df["prediction_latest"]
+
+        logger.info("###################### THEN ######################")
+        logger.info(df.head())
+
+        # Sum all prediction errors for each model
+        mae_current = df["prediction_error_current"].mean()
+        mae_latest = df["prediction_error_latest"].mean()
+
+        # Compare models based on erro count
+        logger.info(f"MAE for current Model: {mae_current}")
+        logger.info(f"MAE for latest Model: {mae_latest}")
+
+        if mae_current < mae_latest:
+            logger.info("Current Model performs better.")
+            return True
+        else:
+            logger.info("New Model performs worse.")
+            return False
