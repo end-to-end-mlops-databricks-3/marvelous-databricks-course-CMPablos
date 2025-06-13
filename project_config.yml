@@ -11,7 +11,7 @@ dev:
 parameters:
   learning_rate: 0.01
   n_estimators: 500
-  max_depth: 3
+  max_depth: 5
 
 experiment_name_basic: /Shared/hotel-reservations-basic
 experiment_name_fe: /Shared/hotel-reservations-fe
