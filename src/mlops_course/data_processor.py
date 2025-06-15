@@ -1,6 +1,5 @@
 """Data preprocessing module."""
 
-import datetime
 import time
 
 import numpy as np
@@ -82,7 +81,6 @@ class DataProcessor:
 
         This method alters the tables to enable Change Data Feed functionality.
         """
-
         self.spark.sql(
             f"ALTER TABLE {self.config.catalog_name}.{self.config.schema_name}.{self.config.dataset_name}_hotel_reservations_train_set "
             "SET TBLPROPERTIES (delta.enableChangeDataFeed = true);"
@@ -92,6 +90,7 @@ class DataProcessor:
             f"ALTER TABLE {self.config.catalog_name}.{self.config.schema_name}.{self.config.dataset_name}_hotel_reservations_test_set "
             "SET TBLPROPERTIES (delta.enableChangeDataFeed = true);"
         )
+
 
 def generate_synthetic_data(df: pd.DataFrame, drift: bool = False, num_rows: int = 500) -> pd.DataFrame:
     """Generate synthetic data matching input DataFrame distributions with optional drift.
@@ -118,7 +117,7 @@ def generate_synthetic_data(df: pd.DataFrame, drift: bool = False, num_rows: int
 
                 if column == "avg_price_per_room":
                     synthetic_data[column] = np.maximum(0, synthetic_data[column])  # Ensure values are non-negative
-        
+
         if column == "required_car_parking_space":
             synthetic_data[column] = np.random.randint(0, 2, size=num_rows)
 
@@ -152,7 +151,7 @@ def generate_synthetic_data(df: pd.DataFrame, drift: bool = False, num_rows: int
         "no_of_previous_bookings_not_canceled",
         "no_of_special_requests",
         "required_car_parking_space",
-        "repeated_guest"
+        "repeated_guest",
     }
     for col in int_columns.intersection(df.columns):
         synthetic_data[col] = synthetic_data[col].astype(np.int64)

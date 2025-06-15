@@ -1,10 +1,12 @@
+"""fe model train and registering."""
+
 from loguru import logger
+from marvelous.common import create_parser
 from pyspark.dbutils import DBUtils
 from pyspark.sql import SparkSession
 
 from mlops_course.config import ProjectConfig, Tags
 from mlops_course.models.feature_lookup_model import FeatureLookUpModel
-from marvelous.common import create_parser
 
 args = create_parser()
 
@@ -21,14 +23,10 @@ tags = Tags(**tags_dict)
 fe_model = FeatureLookUpModel(config=config, tags=tags, spark=spark)
 logger.info("Model initialized.")
 
-# Create feature table
-# fe_model.create_feature_table()
 
 fe_model.update_feature_table()
 logger.info("Feature table updated.")
 
-# Define house age feature function
-# fe_model.define_feature_function()
 
 # Load data
 fe_model.load_data()
@@ -54,7 +52,7 @@ logger.info("Model evaluation completed, model improved: ", model_improved)
 is_test = args.is_test
 
 # when running test, always register and deploy
-if is_test==1:
+if is_test == 1:
     model_improved = True
 
 if model_improved:

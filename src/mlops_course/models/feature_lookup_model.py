@@ -88,7 +88,8 @@ class FeatureLookUpModel:
             "lead_time", "no_of_special_requests", "arrival_year"
         )
         self.test_set = self.spark.table(
-            f"{self.catalog_name}.{self.schema_name}.hotel_reservations_test_set").toPandas()
+            f"{self.catalog_name}.{self.schema_name}.hotel_reservations_test_set"
+        ).toPandas()
 
         self.train_set = self.train_set.withColumn("no_of_adults", self.train_set["no_of_adults"].cast("int"))
         self.train_set = self.train_set.withColumn("no_of_children", self.train_set["no_of_children"].cast("int"))
@@ -208,12 +209,12 @@ class FeatureLookUpModel:
         return predictions
 
     def update_feature_table(self) -> None:
-            """Update the hotel_reservations table with the latest records from train and test sets.
+        """Update the hotel_reservations table with the latest records from train and test sets.
 
-            Executes SQL queries to insert new records based on timestamp.
-            """
-            queries = [
-                f"""
+        Executes SQL queries to insert new records based on timestamp.
+        """
+        queries = [
+            f"""
                 WITH max_timestamp AS (
                     SELECT MAX(update_timestamp_utc) AS max_update_timestamp
                     FROM {self.config.catalog_name}.{self.config.schema_name}.hotel_reservations_train_set
@@ -223,7 +224,7 @@ class FeatureLookUpModel:
                 FROM {self.config.catalog_name}.{self.config.schema_name}.hotel_reservations_train_set
                 WHERE update_timestamp_utc >= (SELECT max_update_timestamp FROM max_timestamp)
                 """,
-                f"""
+            f"""
                 WITH max_timestamp AS (
                     SELECT MAX(update_timestamp_utc) AS max_update_timestamp
                     FROM {self.config.catalog_name}.{self.config.schema_name}.hotel_reservations_test_set
@@ -233,12 +234,12 @@ class FeatureLookUpModel:
                 FROM {self.config.catalog_name}.{self.config.schema_name}.hotel_reservations_test_set
                 WHERE update_timestamp_utc >= (SELECT max_update_timestamp FROM max_timestamp)
                 """,
-            ]
+        ]
 
-            for query in queries:
-                logger.info("Executing SQL update query...")
-                self.spark.sql(query)
-            logger.info("Hotel reservations features table updated successfully.")
+        for query in queries:
+            logger.info("Executing SQL update query...")
+            self.spark.sql(query)
+        logger.info("Hotel reservations features table updated successfully.")
 
     def model_improved(self, test_set: DataFrame) -> bool:
         """Evaluate the model performance on the test set.
@@ -263,7 +264,6 @@ class FeatureLookUpModel:
         predictions_current = self.fe.score_batch(model_uri=current_model_uri, df=X_test).withColumnRenamed(
             "prediction", "prediction_current"
         )
-
 
         test_set = test_set.select("Booking_ID", "booking_status")
         logger.info("#################### test_set NOW ######################")
