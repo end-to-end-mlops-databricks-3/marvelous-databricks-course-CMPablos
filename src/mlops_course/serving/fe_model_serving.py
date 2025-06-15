@@ -5,6 +5,7 @@ import time
 import mlflow
 from databricks.sdk import WorkspaceClient
 from databricks.sdk.service import catalog
+from databricks.sdk.errors import NotFound
 from databricks.sdk.service.catalog import (
     OnlineTableSpec,
     OnlineTableSpecTriggeredSchedulingPolicy,
@@ -52,7 +53,7 @@ class FeatureLookupServing:
         return latest_version
 
     def create_or_update_online_table(self) -> None:
-        """Create or update an online table for house features."""
+        """Create or update an online table for hotel_reservations features."""
         try:
             existing_table = self.workspace.online_tables.get(self.online_table_name)
             logger.info("Online table already exists. Inititating table update.")
@@ -75,9 +76,9 @@ class FeatureLookupServing:
                 else:
                     logger.info(f"Pipeline is in {state} state.")
                 time.sleep(30)
-        except catalog.NotFound:
+        except NotFound:
             spec = OnlineTableSpec(
-                primary_key_columns=["Id"],
+                primary_key_columns=["Booking_ID"],
                 source_table_full_name=self.feature_table_name,
                 run_triggered=OnlineTableSpecTriggeredSchedulingPolicy.from_dict({"triggered": "true"}),
                 perform_full_copy=False,
