@@ -11,7 +11,7 @@ dev:
 parameters:
   learning_rate: 0.01
   n_estimators: 500
-  max_depth: 3
+  max_depth: 5
 
 experiment_name_basic: /Shared/hotel-reservations-basic
 experiment_name_fe: /Shared/hotel-reservations-fe
@@ -33,10 +33,10 @@ num_features:
   - no_of_previous_bookings_not_canceled
   - avg_price_per_room
   - no_of_special_requests
+  - required_car_parking_space
 
 cat_features:
   - type_of_meal_plan
-  - required_car_parking_space
   - room_type_reserved
   - market_segment_type
   - repeated_guest
