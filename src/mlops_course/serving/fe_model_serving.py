@@ -4,7 +4,6 @@ import time
 
 import mlflow
 from databricks.sdk import WorkspaceClient
-from databricks.sdk.service import catalog
 from databricks.sdk.errors import NotFound
 from databricks.sdk.service.catalog import (
     OnlineTableSpec,
